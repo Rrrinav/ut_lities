@@ -13,3 +13,7 @@ A collection of **header only [stb](https://github.com/nothings/stb) style libra
 ## Term graphics
 
 > A simple terminal graphics library for drawing shapes and text i/o 3D etc.
+
+## Str_utl_funcs
+
+> String utility functions
