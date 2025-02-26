@@ -38,6 +38,7 @@
 
 #include <cstddef>
 #include <cstring>
+#include <iostream>
 
 namespace utl
 {
@@ -126,10 +127,116 @@ namespace utl
     void print_state() const;
 
     //Deleted copy constructor and assignment operator
-    R_ena(const R_ena& other) = delete;
-    R_ena(const R_ena&& other) = delete;
-    R_ena operator=(const R_ena& other) = delete;
-    R_ena operator=(const R_ena&& other) = delete;
+    R_ena(const R_ena &other) = delete;
+    R_ena(const R_ena &&other) = delete;
+    R_ena operator=(const R_ena &other) = delete;
+    R_ena operator=(const R_ena &&other) = delete;
+  };
+
+  struct DR_node
+  {
+    char *data;
+    DR_node *next;
+    std::size_t size;
+  };
+
+  // Dynamic arena using a linked list
+  class DR_ena
+  {
+    DR_node *head;
+    DR_node *current;
+    std::size_t size;
+    std::size_t num_nodes;
+
+  public:
+    DR_ena() : head(nullptr), current(nullptr), size(0), num_nodes(0) {}
+
+    ~DR_ena()
+    {
+      DR_node *node = head;
+      while (node)
+      {
+        DR_node *temp = node;
+        node = node->next;
+        delete[] temp->data;
+        delete temp;
+      }
+      head = nullptr;
+      current = nullptr;
+    }
+
+    void *allocate_raw(std::size_t bytes)
+    {
+      // Allocate new memory chunk
+      char *data = new char[bytes];
+      std::memset(data, 0, bytes);
+      // Create a new node
+      DR_node *node = new DR_node{data, nullptr, bytes};
+
+      if (!head)
+      {
+        // If first allocation, initialize head and current
+        head = node;
+        current = node;
+      }
+      else
+      {
+        // Otherwise, append to linked list
+        current->next = node;
+        current = node;
+      }
+
+      size += bytes;
+      num_nodes++;
+      return data;
+    }
+
+    template <typename T, typename... Targs>
+    T* create_object(Targs&&... args)
+    {
+      void* memory = allocate_raw(sizeof(T));
+      if (!memory) {
+        std::cerr << "[ERROR] Allocation failed!" << std::endl;
+        return nullptr;
+      }
+      return new (memory) T(std::forward<Targs>(args)...);
+    }
+
+    void reset()
+    {
+      DR_node *node = head;
+      while (node)
+      {
+        std::memset(node->data, 0, node->size);
+        node = node->next;
+      }
+    }
+
+    void deallocate_whole()
+    {
+      // Free all nodes and reset state
+      DR_node *node = head;
+      while (node)
+      {
+        DR_node *temp = node;
+        node = node->next;
+        delete[] temp->data;
+        delete temp;
+      }
+      head = nullptr;
+      current = nullptr;
+      size = 0;
+      num_nodes = 0;
+    }
+
+    size_t get_used_space() const { return size; }
+    size_t get_num_allocations() const { return num_nodes; }
+
+    // Deleted copy constructor and assignment operator
+    DR_ena(const DR_ena &other) = delete;
+    DR_ena(const DR_ena &&other) = delete;
+    DR_ena operator=(const DR_ena &other) = delete;
+    DR_ena operator=(const DR_ena &&other) = delete;
   };
 }  // namespace utl
 
