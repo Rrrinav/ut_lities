@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <cstring>
 #include <iostream>
+#include <utility>
 
 class R_ena
 {
@@ -50,16 +51,11 @@ public:
     return char_ptr >= _arena && char_ptr < _arena + size;
   }
 
-  void resize(std::size_t new_size)
-  {
-    if (new_size <= size)
-      return;
-    char *new_arena = new char[new_size];
-    std::memcpy(new_arena, _arena, size);
-    delete[] _arena;
-    _arena = new_arena;
-    size = new_size;
-  }
+  // Deleted constructors
+  R_ena(const R_ena& other) = delete;
+  R_ena(const R_ena&& other) = delete;
+  R_ena operator=(const R_ena& other) = delete;
+  R_ena operator=(const R_ena&& other) = delete;
 };
 
 class MyClass
@@ -94,8 +90,5 @@ int main()
 
   std::cout << "Remaining space is: " << arena.remaining_space() << '\n';
 
-  arena.resize(1050);
-  std::cout << "Size of arena after reisze is: " << arena.get_size() << std::endl;
-  std::cout << "Remaining space after resize is: " << arena.remaining_space() << '\n';
   return 0;
 }

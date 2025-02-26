@@ -106,15 +106,6 @@ namespace utl
     T *create_object(Targs &&...Fargs);
 
     /*
-     * @brief Manually destroy an object by calling its destructor
-     * @param T* ptr Pointer to the object to destroy
-     * @details Call the destructor of an object without deallocating its memory.
-     *          This is only needed if you want to manage object lifetimes explicitly.
-    */
-    template <typename T>
-    void destroy_object(T *ptr);
-
-    /*
      * @brief allocate memory
      * @return (size_t) remaining space in the arena
      */
@@ -132,15 +123,13 @@ namespace utl
      */
     size_t used_space();
 
-    /*
-     * @brief Increase size of arena
-     * @param (size_t) new_size New size of the arena
-     * @return (bool) wether the arena was resized or not, generally false if new_size is less than or equal to the current size.
-     * @details Adds more memory to the arena if the new size is greater than the current size.
-     */
-    bool resize(std::size_t new_size);
-
     void print_state() const;
+
+    //Deleted copy constructor and assignment operator
+    R_ena(const R_ena& other) = delete;
+    R_ena(const R_ena&& other) = delete;
+    R_ena operator=(const R_ena& other) = delete;
+    R_ena operator=(const R_ena&& other) = delete;
   };
 }  // namespace utl
 
@@ -189,13 +178,6 @@ T *utl::R_ena::create_object(Targs &&...Fargs)
   return new (memory) T(std::forward<Targs>(Fargs)...);
 }
 
-template <typename T>
-void utl::R_ena::destroy_object(T *ptr)
-{
-  if (ptr)
-    ptr->~T();  // Explicitly call destructor
-}
-
 size_t utl::R_ena::remaining_space() { return size - offset; }
 
 bool utl::R_ena::contains(void *ptr)
@@ -205,18 +187,6 @@ bool utl::R_ena::contains(void *ptr)
 }
 
 size_t utl::R_ena::used_space() { return offset; }
-
-bool utl::R_ena::resize(std::size_t new_size)
-{
-  if (new_size <= size)
-    return false;
-  char *new_arena = new char[new_size];
-  std::memcpy(new_arena, _arena, size);
-  delete[] _arena;
-  _arena = new_arena;
-  size = new_size;
-  return true;
-}
 
 void utl::R_ena::print_state() const
 {
