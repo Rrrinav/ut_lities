@@ -125,13 +125,13 @@ ctx.inject(my_config); // Automatically calls to_json
 std::string out1 = std::format("{}", generated_json);
 
 // Minified formatting (0 spaces, no newlines)
-std::string out2 = std::format("{:w0}", generated_json);
+std::string out2 = std::format("{:0w}", generated_json);
 
 // 2-space indentation
-std::string out3 = std::format("{:w2}", generated_json);
+std::string out3 = std::format("{:2w}", generated_json);
 
 // Format doubles with exactly 2 decimal places
-std::string out4 = std::format("{:f2}", generated_json);
+std::string out4 = std::format("{:2f}", generated_json);
 
 ```
 
