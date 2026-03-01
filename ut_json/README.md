@@ -140,6 +140,6 @@ std::string out4 = std::format("{:2f}", generated_json);
 * `<n>w`: Indent size (e.g., `4w` for 4 spaces, `0w` for minified).
 * `<n>f`: Format floats/doubles to `<n>` decimal places.
 * `<n>g`: Format floats/doubles to `<n>` significant figures.
-* `e`: Do not escape strings (raw string output).
+* `E`: Do not escape strings (raw string output).
 
 Would you like me to add a section to the README explaining the error handling (specifically the `utl::jsn::errors` namespace) in more detail?
